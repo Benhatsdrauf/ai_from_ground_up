@@ -13,6 +13,15 @@ def mse_loss(predicted_prices, actual_prices):
     # could also be written as a one liner 
     # return np.mean((predicted_prices - actual_prices) ** 2)
 
+
+def calculate_gradient(sizes, predicted_prices, actual_prices):
+    #Calculate the gradient of the loss with respect to w and b.
+    N = len(sizes)
+    errors = predicted_prices - actual_prices
+    w_gradient = (2/N) * np.dot(errors, sizes)  # dL/dw
+    b_gradient = (2/N) * errors.sum()            # dL/db
+    return w_gradient, b_gradient
+
 # Secret rule the model has to discover
 TRUE_W = 200.0
 TRUE_B = 50.0
@@ -57,3 +66,17 @@ print("loss when predictions = actuals:", mse_loss(prices, prices))
 # Test 2: with bad weights (w=100, b=0), loss should be a big number
 bad_predictions = predict(sizes, guess_w, guess_b)
 print("loss with bad weights:", mse_loss(bad_predictions, prices))
+
+# experiment: what happens if we change w from 100 to 101? Does the loss go up or down?
+# to see how the loss changes, and learn how gradients work, we can calculate the loss at w=100 and w=101, keeping b fixed at 0.
+#loss_at_100 = mse_loss(predict(sizes, 100.0, 0.0), prices)
+#loss_at_101 = mse_loss(predict(sizes, 101.0, 0.0), prices)
+
+#print("loss at w=100:", loss_at_100)
+#print("loss at w=101:", loss_at_101)
+#print("change:", loss_at_101 - loss_at_100)
+
+y_pred = predict(sizes, 100.0, 0.0)
+grad_w, grad_b = calculate_gradient(sizes, y_pred, prices)
+print("grad_w:", grad_w)
+print("grad_b:", grad_b)
