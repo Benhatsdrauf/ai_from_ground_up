@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt   # NEW: for plotting
 
 def predict(sizes, w, b):
     #Predict the price of a house given its size.
@@ -34,12 +33,6 @@ prices = TRUE_W * sizes + TRUE_B + noise
 for size, price in zip(sizes[:5], prices[:5]):
     print(f"size = {size:6.1f} m²   ->   price = {price:7.1f}")
 
-# NEW: plot the houses as a scatter plot
-plt.scatter(sizes, prices, alpha=0.6)
-plt.xlabel("Size (m²)")
-plt.ylabel("Price")
-plt.title("Fake houses — noisy data around the true line")
-plt.show()
 
 # Try the function with deliberately WRONG weights first.
 # The model hasn't "learned" anything yet, so predictions should be bad.
