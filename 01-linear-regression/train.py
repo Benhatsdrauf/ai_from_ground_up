@@ -5,6 +5,15 @@ def predict(sizes, w, b):
     #Predict the price of a house given its size.
     return w * sizes + b    
 
+def mse_loss(predicted_prices, actual_prices):
+    #Calculate the mean squared error between predicted and actual prices.
+    errors        = predicted_prices - actual_prices     # how wrong, with sign
+    squared       = errors ** 2          # all positive, big errors blown up
+    loss          = squared.mean()       # one number summarising "how bad on average"
+    return loss
+    # could also be written as a one liner 
+    # return np.mean((predicted_prices - actual_prices) ** 2)
+
 # Secret rule the model has to discover
 TRUE_W = 200.0
 TRUE_B = 50.0
@@ -48,3 +57,10 @@ predicted_prices = predict(sizes, TRUE_W, TRUE_B)
 print("\n--- predictions with true weights (w=200, b=50) ---")
 for size, pred, actual in zip(sizes[:5], predicted_prices[:5], prices[:5]):
     print(f"size={size:6.1f}   predicted={pred:8.1f}   actual={actual:8.1f}")
+
+# Test 1: predicting the actuals exactly should give loss = 0
+print("loss when predictions = actuals:", mse_loss(prices, prices))
+
+# Test 2: with bad weights (w=100, b=0), loss should be a big number
+bad_predictions = predict(sizes, guess_w, guess_b)
+print("loss with bad weights:", mse_loss(bad_predictions, prices))
