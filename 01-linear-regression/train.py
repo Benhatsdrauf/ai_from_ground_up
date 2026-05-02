@@ -1,6 +1,7 @@
+from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.datasets import fetch_california_housing
-
+    
 def predict(X, w, b):
     #Predict the price of a house given its features.
     return X @ w + b    
@@ -29,23 +30,12 @@ dataset = fetch_california_housing()
 X = dataset.data        # shape (20640, 8) — 20,640 houses, 8 features each
 y = dataset.target      # shape (20640,) — median house value, in units of $100,000
 
-# Look at what we have
-print("X shape:", X.shape)
-print("y shape:", y.shape)
-print("\nFeature names:", dataset.feature_names)
-print("\nFirst 3 houses (raw values):")
-print(X[:3])
-print("\nFirst 3 target prices:", y[:3])
 
 # Normalize each feature: subtract column mean, divide by column std
 X_mean = X.mean(axis=0)
 X_std = X.std(axis=0)
 X = (X - X_mean) / X_std
 
-# Verify: every feature should have mean ≈ 0 and std ≈ 1
-print("\n--- after normalization ---")
-print("Per-feature means:", X.mean(axis=0))
-print("Per-feature stds: ", X.std(axis=0))
 
 # Train/test split: 80/20
 n_samples = X.shape[0]
@@ -93,3 +83,13 @@ print(f"\nLearned weights (one per feature):")
 for name, weight in zip(dataset.feature_names, w):
     print(f"  {name:12s} {weight:+.4f}")
 print(f"  bias         {b:+.4f}")
+
+
+plt.figure(figsize=(8, 5))
+plt.plot(losses)
+plt.xlabel("Epoch")
+plt.ylabel("MSE Loss")
+plt.title("Training Loss — California Housing")
+plt.grid(True, alpha=0.3)
+plt.savefig("loss_curve.png", dpi=120)
+plt.show()

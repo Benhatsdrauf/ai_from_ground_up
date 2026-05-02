@@ -3,6 +3,53 @@
 **Stack:** Python + NumPy + Matplotlib
 **Time:** ~1 weekend
 **Goal:** Understand gradient descent, loss functions, and what it means for a model to "learn."
+**Status:** Complete
+
+Trained a linear regression model from scratch in NumPy (no scikit-learn for the model — just for loading data) on the California Housing dataset.
+
+## Results
+
+**Final test MSE: 0.5624** (RMSE ≈ 0.75 → typical error of about $75K, on prices in $100K units)
+
+![Training loss curve](loss_curve.png)
+
+Classic "hockey stick" curve — sharp drop in the first ~100 epochs as the model finds the rough answer, then a long fine-tuning tail down to the irreducible noise floor.
+
+### What the model learned
+
+After training, the 8 learned weights recovered real economic intuition — without anyone telling the model anything:
+
+| Feature | Weight | Interpretation |
+|---------|-------:|----------------|
+| Median Income     | **+0.85** | strongest predictor — higher income → higher price |
+| Average Bedrooms  | +0.26 | more bedrooms → higher price |
+| House Age         | +0.15 | slightly older houses cost slightly more |
+| Average Occupancy | -0.05 | denser households → slightly cheaper |
+| Average Rooms     | -0.26 | counterintuitive (correlates with rural areas) |
+| **Latitude**      | **-0.68** | northern California cheaper on average |
+| **Longitude**     | **-0.65** | inland cheaper than coast |
+| Population        | +0.00 | essentially irrelevant |
+
+### Milestones & learning notes
+
+Built progressively across 6 milestones. After each, I wrote a short reflection on what I learned, what clicked, and what tripped me up:
+
+1. [Forward pass (`predict`)](./notes/milestone-1.md)
+2. [Loss function (`mse_loss`)](./notes/milestone-2.md)
+3. [Gradients (`compute_gradients`)](./notes/milestone-3.md)
+4. [Training loop](./notes/milestone-4.md)
+5. [Real housing data + normalization](./notes/milestone-5.md)
+6. [Visualizing the loss curve](./notes/milestone-6.md)
+
+### Run it yourself
+
+```bash
+cd 01-linear-regression
+uv sync
+uv run python train.py
+```
+
+---
 
 This is the most important project on the ladder. Every neural network — including the LLM you'll build in Project 4 — is fundamentally a more elaborate version of what you're about to build. Take your time.
 
