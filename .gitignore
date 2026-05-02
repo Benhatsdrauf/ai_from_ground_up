@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# uv / virtual envs
+.venv/
+venv/
+env/
+.env
+.env.*
+.python-version
+
+# Notebooks
+.ipynb_checkpoints/
+
+# ML artifacts / model weights
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.gguf
+checkpoints/
+runs/
+wandb/
+mlruns/
+lightning_logs/
+outputs/
+
+# Datasets / large data
+data/
+datasets/
+*.csv
+*.tsv
+*.parquet
+*.npy
+*.npz
+*.h5
+*.hdf5
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
