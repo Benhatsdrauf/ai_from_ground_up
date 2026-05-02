@@ -38,45 +38,35 @@ sizes  = np.random.uniform(20, 200, size=N)
 noise  = np.random.randn(N) * 500
 prices = TRUE_W * sizes + TRUE_B + noise
 
-# Show the first 5 so you can see the noise
-for size, price in zip(sizes[:5], prices[:5]):
-    print(f"size = {size:6.1f} m²   ->   price = {price:7.1f}")
 
+# Initialize
+w = 0.0
+b = 0.0
+learning_rate = 1e-5
 
-# Try the function with deliberately WRONG weights first.
-# The model hasn't "learned" anything yet, so predictions should be bad.
-guess_w = 100.0
-guess_b = 0.0
-predicted_prices = predict(sizes, guess_w, guess_b)
+# Storage for the loss at every epoch (we'll plot this in Milestone 6)
+losses = []
 
-print("\n--- predictions with bad weights (w=100, b=0) ---")
-for size, pred, actual in zip(sizes[:5], predicted_prices[:5], prices[:5]):
-    print(f"size={size:6.1f}   predicted={pred:8.1f}   actual={actual:8.1f}")
+# Train for 100,000 iterations ("epochs")
+for epoch in range(100_000):
+    # Forward pass: predict and measure how wrong we are
+    y_pred = predict(sizes, w, b)
+    loss = mse_loss(y_pred, prices)
 
-# Now try with the TRUE weights — predictions should be very close to actual.
-predicted_prices = predict(sizes, TRUE_W, TRUE_B)
+    # Backward pass: figure out which way to nudge w and b
+    grad_w, grad_b = calculate_gradient(sizes, y_pred, prices)
 
-print("\n--- predictions with true weights (w=200, b=50) ---")
-for size, pred, actual in zip(sizes[:5], predicted_prices[:5], prices[:5]):
-    print(f"size={size:6.1f}   predicted={pred:8.1f}   actual={actual:8.1f}")
+    # Apply the update rule
+    w = w - learning_rate * grad_w
+    b = b - learning_rate * grad_b
 
-# Test 1: predicting the actuals exactly should give loss = 0
-print("loss when predictions = actuals:", mse_loss(prices, prices))
+    # Remember the loss so we can plot it later
+    losses.append(loss)
 
-# Test 2: with bad weights (w=100, b=0), loss should be a big number
-bad_predictions = predict(sizes, guess_w, guess_b)
-print("loss with bad weights:", mse_loss(bad_predictions, prices))
+    # Print every 1000 epochs so the terminal isn't flooded
+    if epoch % 1000 == 0:
+        print(f"Epoch {epoch:5d}  loss={loss:.2f}  w={w:.2f}  b={b:.2f}")
 
-# experiment: what happens if we change w from 100 to 101? Does the loss go up or down?
-# to see how the loss changes, and learn how gradients work, we can calculate the loss at w=100 and w=101, keeping b fixed at 0.
-#loss_at_100 = mse_loss(predict(sizes, 100.0, 0.0), prices)
-#loss_at_101 = mse_loss(predict(sizes, 101.0, 0.0), prices)
-
-#print("loss at w=100:", loss_at_100)
-#print("loss at w=101:", loss_at_101)
-#print("change:", loss_at_101 - loss_at_100)
-
-y_pred = predict(sizes, 100.0, 0.0)
-grad_w, grad_b = calculate_gradient(sizes, y_pred, prices)
-print("grad_w:", grad_w)
-print("grad_b:", grad_b)
+print(f"\nFinal: w = {w:.2f}  (true: 200.0)")
+print(f"       b = {b:.2f}  (true: 50.0)")
+print(f"Final loss = {loss:.2f}")
