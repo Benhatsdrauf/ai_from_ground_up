@@ -176,3 +176,120 @@ for ax, idx in zip(axes.flat, wrong[:10]):
 plt.tight_layout()
 plt.savefig("misclassified.png", dpi=120)
 plt.show()
+
+# ----------------------------------------------------------------------------
+# Visualize what hidden layer 1 learned
+# ----------------------------------------------------------------------------
+
+fig, axes = plt.subplots(4, 4, figsize=(10, 10))
+for ax, j in zip(axes.flat, range(16)):
+    weights = W1[:, j].reshape(28, 28)  # weight pattern for hidden neuron j
+    ax.imshow(weights, cmap="seismic")  # red = positive, blue = negative, white ≈ 0
+    ax.set_title(f"Hidden #{j}")
+    ax.axis("off")
+
+plt.suptitle("First-layer weight patterns — what each hidden neuron is 'looking for'")
+plt.tight_layout()
+plt.savefig("weights_layer1.png", dpi=120)
+plt.show()
+
+# ----------------------------------------------------------------------------
+# Visualize what hidden layer 1 learned (improved)
+# ----------------------------------------------------------------------------
+
+# Pick the 16 neurons with the largest weight magnitude — the most "specialized" ones.
+# (Neurons whose weights are all near zero learned little; skip them.)
+weight_magnitudes = np.abs(W1).sum(axis=0)
+top_neurons = np.argsort(weight_magnitudes)[-16:]   # indices of top 16
+
+fig, axes = plt.subplots(4, 4, figsize=(10, 10))
+for ax, j in zip(axes.flat, top_neurons):
+    weights = W1[:, j].reshape(28, 28)
+    # Symmetric scale around 0 so red/blue have equal weight
+    abs_max = np.abs(weights).max()
+    ax.imshow(weights, cmap="seismic", vmin=-abs_max, vmax=abs_max)
+    ax.set_title(f"Hidden #{j}")
+    ax.axis("off")
+
+plt.suptitle("Top 16 most-active hidden neurons (W1) — what each is 'looking for'")
+plt.tight_layout()
+plt.savefig("weights_layer1.png", dpi=120)
+plt.show()
+
+# ----------------------------------------------------------------------------
+# Visualize the forward pass for one specific image
+# ----------------------------------------------------------------------------
+
+idx = 0  # try changing this to pick different test images
+img = X_test[idx]
+true_label = y_test[idx]
+
+# Run forward pass and capture intermediates
+Z1_one, A1_one, Z2_one, Y_hat_one = forward(img.reshape(1, -1), W1, b1, W2, b2)
+
+fig, axes = plt.subplots(1, 4, figsize=(18, 4))
+
+# 1) The input image
+axes[0].imshow(img.reshape(28, 28), cmap="gray")
+axes[0].set_title(f"Input image\n(true label: {true_label})")
+axes[0].axis("off")
+
+# 2) Hidden activations after ReLU — 128 numbers
+axes[1].bar(range(128), A1_one[0])
+axes[1].set_title("Hidden layer A1\n(after ReLU)")
+axes[1].set_xlabel("Hidden neuron #")
+axes[1].set_ylabel("Activation")
+
+# 3) Output logits BEFORE softmax — 10 numbers
+axes[2].bar(range(10), Z2_one[0])
+axes[2].set_title("Output logits Z2\n(before softmax)")
+axes[2].set_xlabel("Class")
+axes[2].set_ylabel("Logit value")
+
+# 4) Final probabilities AFTER softmax — 10 numbers summing to 1
+axes[3].bar(range(10), Y_hat_one[0])
+axes[3].set_title(f"Probabilities Y_hat\n(predicted: {Y_hat_one[0].argmax()})")
+axes[3].set_xlabel("Class")
+axes[3].set_ylabel("Probability")
+axes[3].set_ylim(0, 1)
+
+plt.tight_layout()
+plt.savefig("forward_pass.png", dpi=120)
+plt.show()
+
+# ----------------------------------------------------------------------------
+# Schematic architecture diagram (decorative)
+# ----------------------------------------------------------------------------
+
+fig, ax = plt.subplots(figsize=(12, 7))
+ax.axis("off")
+ax.set_xlim(-0.5, 4)
+ax.set_ylim(-1.3, 1.3)
+
+# We can't show all 784/128/10 nodes — show simplified counts.
+layer_x = [0, 1.8, 3.6]
+layer_show_n = [7, 8, 10]   # how many circles to draw per layer
+layer_actual = [784, 128, 10]
+layer_names = ["Input\n(784 pixels)", "Hidden\n(128 ReLU)", "Output\n(10 softmax)"]
+
+positions = []
+for x, n_show in zip(layer_x, layer_show_n):
+    ys = np.linspace(-1, 1, n_show)
+    for y in ys:
+        ax.plot(x, y, 'o', markersize=18, color='lightblue', zorder=2)
+    positions.append([(x, y) for y in ys])
+
+# Connections between layers (simplified — only the visible nodes)
+for li in range(2):
+    for (x1, y1) in positions[li]:
+        for (x2, y2) in positions[li + 1]:
+            ax.plot([x1, x2], [y1, y2], 'k-', alpha=0.15, linewidth=0.5, zorder=1)
+
+# Layer labels
+for x, label in zip(layer_x, layer_names):
+    ax.text(x, -1.2, label, ha='center', va='top', fontsize=11)
+
+ax.set_title("Network architecture (schematic — actual: 784 → 128 → 10)")
+plt.tight_layout()
+plt.savefig("architecture.png", dpi=120)
+plt.show()
