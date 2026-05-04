@@ -4,6 +4,18 @@
 
 I implemented a working backdrop for a 2-layer neural network written in pure NumPy. Derived all gradients by hand and verefied them.
 
+```python
+# Backward pass — the artifact of milestone 3
+dZ2 = Y_hat - Y_onehot                    # the "miracle" identity
+dW2 = A1.T @ dZ2 / batch_size
+db2 = dZ2.mean(axis=0)
+
+dA1 = dZ2 @ W2.T                          # pass gradient backward through linear layer
+dZ1 = dA1 * (Z1 > 0)                      # backprop through ReLU
+dW1 = X.T @ dZ1 / batch_size
+db1 = dZ1.mean(axis=0)
+```
+
 ## New concepts I learned
 
 - **Backpropagation (the big idea)**: Its the chain rule applied layer by layer, walking backwards throught the network.
@@ -17,6 +29,15 @@ I implemented a working backdrop for a 2-layer neural network written in pure Nu
 - **Backprop through ReLU (`dZ1 = dA1 * (Z1 > 0)`)**: ReLU's derivative is 1 where the input was positive and 0 where it was negative — it's literally a gate. So backprop through ReLU just zeros out the gradient for any neuron that was "off" during the forward pass. In my run, a big chunk of `dZ1` elements were zero, which makes sense: those neurons didn't fire, so they can't be blamed for the loss.
 
 - **Gradient checking (and what dW1 = 0 taught me)**: Finite differences (`(loss(w+ε) - loss(w-ε)) / 2ε`) give a numerical estimate of any gradient, which you can compare against your analytical one. If they match to ~1e-7, your math is right. My first sanity check on `dW1` showed near-zero gradients for random pixels — which initially looked like a bug, but it's actually correct: most MNIST pixels (corners, edges) are black across the entire batch, so those input weights genuinely have zero gradient. Re-checking with center pixels gave non-zero values that matched analytically. Lesson: a "zero gradient" isn't always wrong — sometimes the input is just zero.
+
+  ```
+  W2[ 44, 5]:  analytical=+0.01037125  numerical=+0.01037125  diff=9.05e-12
+  W1[410,88]:  analytical=+0.00087430  numerical=+0.00087430  diff=8.51e-12  (center pixel)
+  b2[7]:       analytical=+0.02252051  numerical=+0.02252051  diff=2.30e-11
+  b1[88]:      analytical=-0.00026421  numerical=-0.00026421  diff=3.00e-11
+  ```
+
+  All four gradients matched analytical-vs-numerical to ~10 decimal places — backprop verified.
 
 ## What clicked / surprised me
 
