@@ -3,6 +3,61 @@
 **Stack:** Python + NumPy (still no PyTorch!)
 **Time:** 1–2 weeks
 **Goal:** Build a multi-layer neural network that classifies MNIST digits, with backpropagation implemented by hand.
+**Status:** Complete
+
+Built a 2-layer fully-connected neural network (`784 → 128 → 10`) in pure NumPy and trained it on MNIST. **Backpropagation derived and coded by hand**, then verified against numerical gradients to ~10⁻¹¹ precision. No PyTorch, no autograd — every gradient is computed manually.
+
+## Results
+
+**Test accuracy: 97.70%** (9,770 / 10,000 correct, 2.30% error rate)
+
+| Metric | Value |
+|--------|------:|
+| Test accuracy | **97.70%** |
+| Train accuracy (final epoch) | 98.39% |
+| Train/test gap (overfitting check) | 0.69% — minimal |
+| Initial loss (uniform random guess) | ~2.30 |
+| Final loss | 0.06 |
+| Training time | 10 epochs (~5 min on CPU) |
+
+The 0.69% train/test gap means the network actually generalized — it didn't just memorize the training set.
+
+### Forward pass on a single test image
+
+This shows how a single MNIST digit flows through the network: input image → 128 hidden activations → 10 output logits → 10 probabilities (after softmax).
+
+![Forward pass for one image](forward_pass.png)
+
+Notice how only a handful of hidden neurons "fire" strongly for any given input — the network is **sparse in practice**. Softmax then dramatically amplifies the largest logit into a confident prediction.
+
+### What it gets wrong
+
+The 230 misclassified test digits are mostly genuinely ambiguous handwriting — the kind of "is that a 4 or a 9?" cases a human would also struggle with at a glance:
+
+![Misclassified test digits](misclassified.png)
+
+### Per-milestone notes
+
+I wrote a short reflection after each milestone — what I learned, what clicked, what I got stuck on:
+
+1. [Forward pass (relu, softmax, forward)](./notes/milestone-1.md)
+2. [Loss function (cross-entropy + one-hot)](./notes/milestone-2.md)
+3. [Backpropagation (the hard one)](./notes/milestone-3.md)
+4. [Training loop (mini-batches + He init)](./notes/milestone-4.md)
+5. [Test-set evaluation](./notes/milestone-5.md)
+6. [Visualizing the trained network](./notes/milestone-6.md)
+
+### Run it yourself
+
+```bash
+cd 02-neural-net-from-scratch
+uv sync
+uv run python train.py
+```
+
+First run downloads MNIST (~10 MB, one-time). Subsequent runs train + evaluate + plot in ~5 minutes.
+
+---
 
 This is the project most people skip. Don't. Once you've coded backprop with raw NumPy, every PyTorch operation in later projects stops feeling like magic. You'll know exactly what `loss.backward()` is doing under the hood.
 

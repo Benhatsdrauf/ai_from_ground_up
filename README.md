@@ -4,13 +4,13 @@ A learn-by-building path from "I know a little Python" to "I understand how LLMs
 
 ## The Ladder
 
-| # | Project | Stack | Core Concept | Time Estimate |
-|---|---------|-------|--------------|---------------|
-| 1 | [Linear Regression from Scratch](./01-linear-regression/) | Python + NumPy | Gradient descent, loss functions | 1 weekend |
-| 2 | [Neural Net from Scratch](./02-neural-net-from-scratch/) | Python + NumPy | Backpropagation, MLPs | 1–2 weeks |
-| 3 | [PyTorch + CNN](./03-pytorch-cnn/) | PyTorch + torchvision | Modern tooling, convolutions | 1 week |
-| 4 | [Tiny GPT from Scratch](./04-tiny-gpt/) | PyTorch | Transformers, self-attention | 2–3 weeks |
-| 5 | [Local Inference & Fine-tuning](./05-local-inference-finetuning/) | transformers + peft | Quantization, LoRA | 1–2 weeks |
+| # | Project | Stack | Core Concept | Status |
+|---|---------|-------|--------------|--------|
+| 1 | [Linear Regression from Scratch](./01-linear-regression/) | Python + NumPy | Gradient descent, loss functions | **Complete** — test MSE 0.56 on California Housing |
+| 2 | [Neural Net from Scratch](./02-neural-net-from-scratch/) | Python + NumPy | Backpropagation, MLPs | **Complete** — 97.7% test accuracy on MNIST |
+| 3 | [PyTorch + CNN](./03-pytorch-cnn/) | PyTorch + torchvision | Modern tooling, convolutions | In progress |
+| 4 | [Tiny GPT from Scratch](./04-tiny-gpt/) | PyTorch | Transformers, self-attention | Not started |
+| 5 | [Local Inference & Fine-tuning](./05-local-inference-finetuning/) | transformers + peft | Quantization, LoRA | Not started |
 
 ## How to Use These Files With Claude Code
 
