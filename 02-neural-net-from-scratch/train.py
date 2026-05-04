@@ -13,6 +13,7 @@ Optimizer:      mini-batch gradient descent (batch size 64, lr 0.1)
 
 import numpy as np
 from sklearn.datasets import fetch_openml
+import matplotlib.pyplot as plt
 
 
 # ----------------------------------------------------------------------------
@@ -149,3 +150,29 @@ for epoch in range(epochs):
     accuracies.append(train_acc)
 
     print(f"Epoch {epoch + 1:2d}  loss={avg_loss:.4f}  train_acc={train_acc:.4f}")
+
+# ----------------------------------------------------------------------------
+# Evaluate on the test set
+# ----------------------------------------------------------------------------
+
+# Forward pass on the entire test set (10,000 images at once — no batching needed for inference)
+_, _, _, Y_hat_test = forward(X_test, W1, b1, W2, b2)
+predictions = Y_hat_test.argmax(axis=1)
+
+test_accuracy = (predictions == y_test).mean()
+print(f"\nTest accuracy: {test_accuracy:.4f}  ({(predictions == y_test).sum()} / {len(y_test)} correct)")
+
+# Find indices where the model was wrong
+wrong = np.where(predictions != y_test)[0]
+print(f"Total misclassified: {len(wrong)} ({len(wrong) / len(y_test):.2%} error rate)")
+
+# Plot the first 10 misclassified images
+fig, axes = plt.subplots(2, 5, figsize=(12, 5))
+for ax, idx in zip(axes.flat, wrong[:10]):
+    ax.imshow(X_test[idx].reshape(28, 28), cmap="gray")
+    ax.set_title(f"True: {y_test[idx]}\nPred: {predictions[idx]}")
+    ax.axis("off")
+
+plt.tight_layout()
+plt.savefig("misclassified.png", dpi=120)
+plt.show()
