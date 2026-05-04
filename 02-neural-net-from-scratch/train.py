@@ -27,6 +27,18 @@ def forward(X, W1, b1, W2, b2):
 
     return Z1, A1, Z2, Y_hat
 
+def one_hot(y, num_classes=10):
+    out = np.zeros((len(y), num_classes))
+    out[np.arange(len(y)), y] = 1
+    return out
+
+def cross_entropy(Y_hat, Y_true_onehot):
+    # Clip to avoid log(0)
+    Y_hat = np.clip(Y_hat, 1e-7, 1 - 1e-7) # Clip to avoid log(0) and log(1)
+
+    # YOUR CODE HERE — return the cross-entropy loss as a single number
+    return -np.sum(Y_true_onehot * np.log(Y_hat)) / len(Y_hat) # Average over the batch 
+
 mnist = fetch_openml('mnist_784', version=1, as_frame=False)
 
 # Pixel values come in as 0–255 ints. Normalize to 0–1 floats.
@@ -45,7 +57,12 @@ b1 = np.zeros(128)
 W2 = np.random.randn(128, 10) * 0.01
 b2 = np.zeros(10)
 
-# Run forward pass on the first 5 training images
-batch = X_train[:5]
-Z1, A1, Z2, Y_hat = forward(batch, W1, b1, W2, b2)
 
+batch = X_train[:64]
+y_batch = y_train[:64]
+
+_, _, _, Y_hat = forward(batch, W1, b1, W2, b2)
+Y_onehot = one_hot(y_batch)
+
+loss = cross_entropy(Y_hat, Y_onehot)
+print(f"Initial loss on a random model: {loss:.4f}")
