@@ -58,11 +58,106 @@ W2 = np.random.randn(128, 10) * 0.01
 b2 = np.zeros(10)
 
 
+
+
+
 batch = X_train[:64]
 y_batch = y_train[:64]
 
-_, _, _, Y_hat = forward(batch, W1, b1, W2, b2)
+Z1, A1, _, Y_hat = forward(batch, W1, b1, W2, b2)
 Y_onehot = one_hot(y_batch)
 
-loss = cross_entropy(Y_hat, Y_onehot)
-print(f"Initial loss on a random model: {loss:.4f}")
+# Backprop step 1 — gradient at the output layer
+dZ2 = Y_hat - Y_onehot
+
+print("dZ2 shape:", dZ2.shape, "(should be (64, 10))")
+print("dZ2 first row:", dZ2[0])
+print("y_batch[0] (correct class for image 0):", y_batch[0])
+
+batch_size = len(batch)   # 64
+
+# Backprop step 2 — gradients for the second layer
+dW2 = A1.T @ dZ2 / batch_size
+db2 = dZ2.mean(axis=0)
+
+print("dW2 shape:", dW2.shape, "(should match W2: (128, 10))")
+print("db2 shape:", db2.shape, "(should match b2: (10,))")
+print("\ndb2 sample:", db2)
+
+dA1 = dZ2 @ W2.T
+
+print("dA1 shape:", dA1.shape, "(should match A1: (64, 128))")
+print("dA1 sample (first 5 values of first row):", dA1[0][:5])
+
+
+# Backprop step 4 — through ReLU
+dZ1 = dA1 * (Z1 > 0)
+
+print("dZ1 shape:", dZ1.shape, "(should match Z1: (64, 128))")
+print("Fraction of dZ1 elements that are zero:", (dZ1 == 0).mean())
+
+# Backprop step 5 — gradients for the first layer
+dW1 = batch.T @ dZ1 / batch_size
+db1 = dZ1.mean(axis=0)
+
+print("dW1 shape:", dW1.shape, "(should match W1: (784, 128))")
+print("db1 shape:", db1.shape, "(should match b1: (128,))")
+
+def numerical_grad(param, idx, X_b, Y_onehot_b, W1, b1, W2, b2, eps=1e-5):
+    """
+    Compute numerical gradient at param[idx] by finite differences.
+    Mutates param temporarily, then restores it.
+    """
+    original = param[idx]
+
+    param[idx] = original + eps
+    _, _, _, Yh_plus = forward(X_b, W1, b1, W2, b2)
+    loss_plus = cross_entropy(Yh_plus, Y_onehot_b)
+
+    param[idx] = original - eps
+    _, _, _, Yh_minus = forward(X_b, W1, b1, W2, b2)
+    loss_minus = cross_entropy(Yh_minus, Y_onehot_b)
+
+    param[idx] = original   # restore — important!
+    return (loss_plus - loss_minus) / (2 * eps)
+
+
+print("\n=== GRADIENT CHECK ===")
+np.random.seed(0)
+
+print("\ndW2 checks:")
+for _ in range(3):
+    i, j = np.random.randint(W2.shape[0]), np.random.randint(W2.shape[1])
+    num = numerical_grad(W2, (i, j), batch, Y_onehot, W1, b1, W2, b2)
+    ana = dW2[i, j]
+    print(f"  W2[{i:3d},{j:2d}]:  analytical={ana:+.8f}  numerical={num:+.8f}  diff={abs(ana-num):.2e}")
+
+print("\ndW1 checks:")
+for _ in range(3):
+    i, j = np.random.randint(W1.shape[0]), np.random.randint(W1.shape[1])
+    num = numerical_grad(W1, (i, j), batch, Y_onehot, W1, b1, W2, b2)
+    ana = dW1[i, j]
+    print(f"  W1[{i:3d},{j:2d}]:  analytical={ana:+.8f}  numerical={num:+.8f}  diff={abs(ana-num):.2e}")
+
+print("\ndW1 re-check (center pixels — should be non-zero):")
+# Pixel positions in the middle of the image (rows 8-20 of 28×28)
+center_pixels = [350, 380, 410, 440]   # spread across the middle
+for i in center_pixels:
+    j = np.random.randint(W1.shape[1])
+    num = numerical_grad(W1, (i, j), batch, Y_onehot, W1, b1, W2, b2)
+    ana = dW1[i, j]
+    print(f"  W1[{i:3d},{j:2d}]:  analytical={ana:+.8f}  numerical={num:+.8f}  diff={abs(ana-num):.2e}")
+
+print("\ndb2 checks:")
+for _ in range(3):
+    j = np.random.randint(b2.shape[0])
+    num = numerical_grad(b2, j, batch, Y_onehot, W1, b1, W2, b2)
+    ana = db2[j]
+    print(f"  b2[{j}]:  analytical={ana:+.8f}  numerical={num:+.8f}  diff={abs(ana-num):.2e}")
+
+print("\ndb1 checks:")
+for _ in range(3):
+    j = np.random.randint(b1.shape[0])
+    num = numerical_grad(b1, j, batch, Y_onehot, W1, b1, W2, b2)
+    ana = db1[j]
+    print(f"  b1[{j}]:  analytical={ana:+.8f}  numerical={num:+.8f}  diff={abs(ana-num):.2e}")
